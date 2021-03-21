@@ -1,0 +1,83 @@
+# Mark, I have removed or adapted your comments.
+# All comments are therefore partly or wholly my own. 
+---
+# I seperated the code for the left side of the flow chart into its own file.
+# Due to docassemble's order of execution, I had to include X1.02.questions.yml 
+# before X1.01.endpoints.yml
+include:
+  - X1.01.questions.yml
+  - X1.02.questions.yml
+  - X1.01.endpoints.yml
+---
+# I need to replace the boilerplate text with a meaningful explanation 
+#I also need to expand the disclaimer
+mandatory: True
+question: Breach of Contract App
+subquestion: |
+  This application assists users to determine whether they are party to a contract which has been breached. 
+
+  ### Disclaimer:
+  [Insert disclaimer]
+
+  By clicking 'I agree and wish to continue', I hereby agree that this application ... 
+  
+  If you do not agree or wish to exit, click 'I do not agree and wish to exit'.
+
+buttons:
+  - I agree and wish to continue: continue
+  - I do not agree and wish to exit: exit
+---
+# This code block controls the execution of the app.
+# The code block asks the work and payment questions
+# and then takes the user to the final screen.  You will
+# see that the final screen contains the logic that drives
+# most of the 'legal' part of the app ie: the code that
+# determines whether the user can sue or not.
+mandatory: True
+code: |
+  MJFsue_reason
+  if MJFsue_reason == 'MJFpromisor':
+  
+  # The preliminary questions are working for the left side of the flow chart
+  # The variables are defined in X1.02.questions.yml 
+    Promisor_work_done
+    Promisor_payment_agreed
+    
+    # IM AM EXPERIMENTING WITH KEEPING MJ NAMES FOR ENDPOINT PURPOSES
+    # Here you can see that I see the variable names the same as on the 
+    # right side of the flow chart. I attempted to differentiate them but
+    # this presented difficulties at the endpoint, namely with the template
+    # for if a contract does not exist. Although the variable names are the
+    # same ...
+    if Promisor_certainty == 'Promisor_agree_exact' and Promisor_consideration == True and User_capacity == True:
+      User_contract_exists = True
+    else:
+    # EXPERIMENTING WITH HAVING THIS AS "Promisor_contract_exists" THEN HAVING
+    # A SEPERATE TEMPLATE FOR 
+      User_contract_exists = False
+     
+    endpoints['final_screen']
+      
+  elif MJFsue_reason == 'MJFpromisee':
+    
+    Promisee_work_requested
+    Promisee_payment_agreed
+    
+    if MJFcertainty == 'MJFagree_exact' and MJFconsideration == True and User_capacity == True:
+      User_contract_exists = True
+    else:
+      User_contract_exists = False
+
+    endpoints['final_screen']
+
+  else:
+    # We should never end up at this else statement as MJFsue_reason
+    # should only ever be one of the two values above.  But if we've
+    # made a typo or some other error, then this else part will be
+    # triggered.  That's useful to us as as it will explain what's
+    # gone wrong if we have made a typo or other error.  It'd be
+    # much harder to find otherwise.
+
+    error_message = 'Unknown value in MJFsue_reason: {}'.format(MJFsue_reason)
+    endpoints['error_screen']
+---
